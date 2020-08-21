@@ -1,0 +1,9 @@
+#+TITLE: Plan to build a lexer
+
+- Take source code(Format of string) and output the next token
+- position = last character read
+- read position = next character to read
+- Function readchar, that reads the next char and puts into the char box
+- NextToken => match chars to enum tokens, returning the token
+- My plan
+- Basically turn the input into a iterator
