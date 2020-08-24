@@ -50,7 +50,7 @@ fn can_be_to_digit(ch: char) -> bool {
     can_be_to_digit_chars.contains(&ch)
 }
 
-fn convert_to_tokens(input: &str) -> Vec<Token> {
+pub fn convert_to_tokens(input: &str) -> Vec<Token> {
     Lexer::new(input).filter(|x| x != " " && x != "\n").map(|x| get_token(&x)).collect::<Vec<_>>()
 }
 
