@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::lexer::Token;
+use crate::token::token::Token;
 
 struct Program {
     statements: Vec<Statement>
@@ -11,10 +11,23 @@ impl Program {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Statement {
     LetStatement(Identifier, Expression)
 }
 
 #[derive(PartialEq, Debug, Eq, Clone)]
 pub struct Identifier(pub String);
+
+#[derive(PartialEq, Debug, Eq, Clone)]
+pub enum Literal {
+    IntLiteral(i64),
+    BoolLiteral(bool),
+    StringLiteral(String),
+}
+
+#[derive(PartialEq, Debug, Eq, Clone)]
+pub enum Expression {
+    IdentExpression(Identifier),
+    LiteralExp(Literal),
+}

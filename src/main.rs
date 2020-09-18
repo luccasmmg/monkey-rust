@@ -6,6 +6,8 @@ use text_io::read;
 mod lexer;
 mod token;
 mod repl;
+mod parser;
+mod ast;
 
 use crate::repl::repl::repl;
 

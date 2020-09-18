@@ -1,9 +1,5 @@
-#+TITLE: Plan to build a lexer
+#+TITLE: Plan to build a parser
 
-- Take source code(Format of string) and output the next token
-- position = last character read
-- read position = next character to read
-- Function readchar, that reads the next char and puts into the char box
-- NextToken => match chars to enum tokens, returning the token
-- My plan
-- Basically turn the input into a iterator
+- Build the node trait, meaning that it has to implement a method, that returns the literal value of the token it's associated with
+- Build the node for the Statement
+- Build the node for the expression
