@@ -14,7 +14,8 @@ impl Program {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Statement {
     LetStatement(Identifier, Expression),
-    ReturnStatement(Expression)
+    ReturnStatement(Expression),
+    ExpressionStatement(Expression),
 }
 
 #[derive(PartialEq, Debug, Eq, Clone)]
@@ -29,6 +30,13 @@ pub enum Literal {
 
 #[derive(PartialEq, Debug, Eq, Clone)]
 pub enum Expression {
-    IdentExpression(Identifier),
+    IdentExp(Identifier),
     LiteralExp(Literal),
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum Prefix {
+    PrefixPlus,
+    PrefixMinus,
+    Not,
 }

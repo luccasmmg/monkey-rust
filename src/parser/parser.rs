@@ -21,21 +21,38 @@ impl Iterator for Parser {
     type Item = Statement;
     fn next(&mut self) -> Option<Self::Item> {
         let remainder = &self.tokens[self.position..];
+        println!("Remainder - {:?}", remainder);
         match remainder {
             [] => None,
             [Token::Let, end @ ..] => {
                 let (stmt, n_position) = check_let(end);
                 self.position += n_position;
                 Some(stmt)
-            }, //JA AUMENTOU 1
+            },
             [Token::Return, end @ ..] => {
                 let (stmt, n_position) = parse_return(end);
                 self.position += n_position;
                 Some(stmt)
-            }, //JA AUMENTOU 1
-            _ => todo!(),
+            },
+            [end @ ..] => {
+                let (stmt, n_position) = parse_expression(end);
+                self.position += n_position;
+                Some(Statement::ExpressionStatement(stmt))
+            },
         }
     }
+}
+
+#[derive(PartialEq, PartialOrd)]
+pub enum Precedence {
+    Lowest,
+    Equals,
+    LessGreater,
+    Sum,
+    Product,
+    Prefix,
+    Call,
+    Index,
 }
 
 fn check_let(rest: &[Token]) -> (Statement, usize) {
@@ -47,7 +64,7 @@ fn check_let(rest: &[Token]) -> (Statement, usize) {
 
 fn parse_return(rest: &[Token]) -> (Statement, usize) {
     let (value, position_up_expression) = parse_expression(&rest);
-    (Statement::ReturnStatement(value), position_up_expression)
+    (Statement::ReturnStatement(value), position_up_expression + 1)
 }
 
 fn parse_let(rest: &[Token]) -> (Statement, usize) {
@@ -55,7 +72,7 @@ fn parse_let(rest: &[Token]) -> (Statement, usize) {
     let position_up_identifier = 2;
     let (value, position_up_expression) = parse_expression(&rest[position_up_identifier..]);
     (Statement::LetStatement(identifier, value),
-     position_up_identifier + position_up_expression)
+     position_up_identifier + position_up_expression + 1)
 }
 
 fn parse_identifier(ident: &Token) -> Identifier {
@@ -67,17 +84,18 @@ fn parse_identifier(ident: &Token) -> Identifier {
 
 fn parse_expression(exp: &[Token]) -> (Expression, usize) {
     match exp {
-        [Token::Int(i), Token::Semicolon, ..] => (Expression::LiteralExp(Literal::IntLiteral(*i)), 3),
+        [Token::Int(i), Token::Semicolon, ..] => (Expression::LiteralExp(Literal::IntLiteral(*i)), 2),
+        [Token::Ident(i), Token::Semicolon, ..] => (Expression::IdentExp(Identifier(String::from(i))), 2),
         _ => panic!(),
     }
 }
 
 #[test]
 fn test_let_statement() {
-    let input = "let fivee = 5; let three = 3;";
+    let input = "let fivee = 5;";
     let parser = Parser::new(input).collect::<Vec<_>>();
-    let test = vec![Statement::LetStatement(Identifier(String::from("fivee")), Expression::LiteralExp(Literal::IntLiteral(5))),
-                    Statement::LetStatement(Identifier(String::from("three")), Expression::LiteralExp(Literal::IntLiteral(3)))];
+    let test = vec![Statement::LetStatement(Identifier(String::from("fivee")), Expression::LiteralExp(Literal::IntLiteral(5)))
+                    ];
     assert_eq!(test, parser);
 }
 
@@ -98,6 +116,22 @@ fn test_return_and_let_statement() {
                     Statement::LetStatement(Identifier(String::from("three")), Expression::LiteralExp(Literal::IntLiteral(3))),
                     Statement::ReturnStatement(Expression::LiteralExp(Literal::IntLiteral(5))),
                     Statement::ReturnStatement(Expression::LiteralExp(Literal::IntLiteral(10)))];
+    assert_eq!(test, parser);
+}
+
+#[test]
+fn test_exp_statement_ident() {
+    let input = "foobar;";
+    let parser = Parser::new(input).collect::<Vec<_>>();
+    let test = vec![Statement::ExpressionStatement(Expression::IdentExp(Identifier(String::from("foobar"))))];
+    assert_eq!(test, parser);
+}
+
+#[test]
+fn test_exp_statement_int() {
+    let input = "5;";
+    let parser = Parser::new(input).collect::<Vec<_>>();
+    let test = vec![Statement::ExpressionStatement(Expression::LiteralExp(Literal::IntLiteral(5)))];
     assert_eq!(test, parser);
 }
 //ITERATOR RETURN STATEMENT
