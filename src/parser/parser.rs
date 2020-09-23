@@ -28,6 +28,11 @@ impl Iterator for Parser {
                 self.position += n_position;
                 Some(stmt)
             }, //JA AUMENTOU 1
+            [Token::Return, end @ ..] => {
+                let (stmt, n_position) = parse_return(end);
+                self.position += n_position;
+                Some(stmt)
+            }, //JA AUMENTOU 1
             _ => todo!(),
         }
     }
@@ -36,8 +41,13 @@ impl Iterator for Parser {
 fn check_let(rest: &[Token]) -> (Statement, usize) {
     match rest[1] {
         Token::Assign => parse_let(rest),
-        _ => panic!(),
+        _ => panic!("Expected a LET TOKEN"),
     }
+}
+
+fn parse_return(rest: &[Token]) -> (Statement, usize) {
+    let (value, position_up_expression) = parse_expression(&rest);
+    (Statement::ReturnStatement(value), position_up_expression)
 }
 
 fn parse_let(rest: &[Token]) -> (Statement, usize) {
@@ -51,7 +61,7 @@ fn parse_let(rest: &[Token]) -> (Statement, usize) {
 fn parse_identifier(ident: &Token) -> Identifier {
     match ident {
         Token::Ident(s) => Identifier(String::from(s)),
-        _ => panic!(),
+        _ => panic!("Expected a IDENTIFIER"),
     }
 }
 
@@ -63,11 +73,31 @@ fn parse_expression(exp: &[Token]) -> (Expression, usize) {
 }
 
 #[test]
-fn it_works() {
-    let input = "let five = 5; let three = 3;";
+fn test_let_statement() {
+    let input = "let fivee = 5; let three = 3;";
     let parser = Parser::new(input).collect::<Vec<_>>();
-    let test = vec![Statement::LetStatement((Identifier(String::from("five"))), Expression::LiteralExp(Literal::IntLiteral(5))),
-    Statement::LetStatement(Identifier(String::from("three")), Expression::LiteralExp(Literal::IntLiteral(3)))];
+    let test = vec![Statement::LetStatement(Identifier(String::from("fivee")), Expression::LiteralExp(Literal::IntLiteral(5))),
+                    Statement::LetStatement(Identifier(String::from("three")), Expression::LiteralExp(Literal::IntLiteral(3)))];
+    assert_eq!(test, parser);
+}
+
+#[test]
+fn test_return_statement() {
+    let input = "return 5; return 10;";
+    let parser = Parser::new(input).collect::<Vec<_>>();
+    let test = vec![Statement::ReturnStatement(Expression::LiteralExp(Literal::IntLiteral(5))),
+                    Statement::ReturnStatement(Expression::LiteralExp(Literal::IntLiteral(10)))];
+    assert_eq!(test, parser);
+}
+
+#[test]
+fn test_return_and_let_statement() {
+    let input = "let fivee = 5; let three = 3; return 5; return 10;";
+    let parser = Parser::new(input).collect::<Vec<_>>();
+    let test = vec![Statement::LetStatement(Identifier(String::from("fivee")), Expression::LiteralExp(Literal::IntLiteral(5))),
+                    Statement::LetStatement(Identifier(String::from("three")), Expression::LiteralExp(Literal::IntLiteral(3))),
+                    Statement::ReturnStatement(Expression::LiteralExp(Literal::IntLiteral(5))),
+                    Statement::ReturnStatement(Expression::LiteralExp(Literal::IntLiteral(10)))];
     assert_eq!(test, parser);
 }
 //ITERATOR RETURN STATEMENT

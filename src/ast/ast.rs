@@ -13,7 +13,8 @@ impl Program {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Statement {
-    LetStatement(Identifier, Expression)
+    LetStatement(Identifier, Expression),
+    ReturnStatement(Expression)
 }
 
 #[derive(PartialEq, Debug, Eq, Clone)]
